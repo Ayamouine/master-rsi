@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/',      [DashboardController::class, 'index'])->name('index');
         Route::get('/stats', [DashboardController::class, 'stats'])->name('stats');
         Route::get('/about', [DashboardController::class, 'about'])->name('about');
+        Route::put('/about', [DashboardController::class, 'updateAbout'])->name('update-about');
     });
 
     // ── Etudiants ──────────────────────────────────────────────────────
@@ -80,7 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}',   [NotesController::class, 'update'])->name('update');
         Route::delete('/{id}', [NotesController::class, 'destroy'])->name('destroy');
     });
-
+Route::put('/about', [DashboardController::class, 'updateAbout'])->name('update-about');
     // ── Géoloc ─────────────────────────────────────────────────────────
     Route::prefix('geoloc')->name('geoloc.')->group(function () {
         Route::get('/', [DashboardController::class, 'geoloc'])->name('index');

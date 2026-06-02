@@ -808,12 +808,14 @@
         i.addEventListener('input', updateHiddenFieldsOnly);
     });
 
-    // initialize hidden fields from initial data
-    updateHiddenFieldsOnly();
+
 
     // ensure hidden fields are updated before submit
-    liveForm.addEventListener('submit', updateHiddenFieldsOnly);
-
+liveForm.addEventListener('submit', function() {
+    if (editMode) {
+        updateHiddenFieldsOnly();
+    }
+});
     if (printBtn) {
         printBtn.addEventListener('click', () => window.print());
     }

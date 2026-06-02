@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Log;
 use App\Models\Etudiant;
 use App\Models\Admin;
 use App\Models\Image;
@@ -78,23 +77,6 @@ class DashboardController extends Controller
     public function updateAbout(Request $request)
     {
         if ($r = $this->checkAuth()) return $r;
-        // Temporary debug log: capture incoming payload to help diagnose save issues
-        try {
-            Log::info('updateAbout incoming payload', $request->all());
-        } catch (\Throwable $_) {
-            // ignore logging errors
-        }
-
-        // Log whether DB columns exist for profile fields
-        try {
-            Log::info('updateAbout columns exist', [
-                'profile_skills' => Schema::hasColumn((new Etudiant())->getTable(), 'profile_skills'),
-                'profile_interests' => Schema::hasColumn((new Etudiant())->getTable(), 'profile_interests'),
-                'profile_experience' => Schema::hasColumn((new Etudiant())->getTable(), 'profile_experience'),
-            ]);
-        } catch (\Throwable $_) {
-            // ignore
-        }
 
         $request->validate([
             'nom'      => 'required|string|max:80',
@@ -116,65 +98,43 @@ class DashboardController extends Controller
             return redirect()->route('about')->with('error', 'Profil introuvable.');
         }
 
-        // Build update array only for columns that exist and are different from current values
-        $updates = [];
-
-        // simple scalar fields
-        $scalarFields = ['nom', 'filiere', 'bio', 'phone', 'email', 'city', 'linkedin', 'github'];
-        foreach ($scalarFields as $field) {
-            if ($request->has($field)) {
-                try {
-                    if (Schema::hasColumn($etudiant->getTable(), $field)) {
-                        $incoming = $request->input($field);
-                        $current = $etudiant->{$field} ?? null;
-                        if ((string) $incoming !== (string) $current) {
-                            $updates[$field] = $incoming;
-                        }
-                    }
-                } catch (\Throwable $_) {
-                    // ignore schema check failures
-                    $incoming = $request->input($field);
-                    $current = $etudiant->{$field} ?? null;
-                    if ((string) $incoming !== (string) $current) {
-                        $updates[$field] = $incoming;
-                    }
-                }
+        $etudiant->nom = $request->nom;
+        // only set filiere if the underlying table has that column
+        try {
+            if (Schema::hasColumn($etudiant->getTable(), 'filiere')) {
+                $etudiant->filiere = $request->filiere;
             }
+        } catch (\Throwable $e) {
+            // ignore if schema cannot be checked (fallback)
         }
-
-        // JSON fields: decode and compare as arrays
-        $jsonFields = ['profile_skills', 'profile_interests', 'profile_experience'];
-        foreach ($jsonFields as $jfield) {
-            if ($request->has($jfield)) {
-                $decoded = null;
-                try { $decoded = json_decode($request->input($jfield), true); } catch (\Throwable $_) { $decoded = null; }
-                try {
-                    if (Schema::hasColumn($etudiant->getTable(), $jfield)) {
-                        $current = $etudiant->{$jfield} ?? null;
-                        // normalize to arrays for comparison
-                        $curArr = is_string($current) ? @json_decode($current, true) : $current;
-                        if ($curArr === null && $current === null) $curArr = null;
-                        if ($curArr !== $decoded) {
-                            $updates[$jfield] = $decoded;
-                        }
-                    }
-                } catch (\Throwable $_) {
-                    if ($etudiant->{$jfield} !== $decoded) {
-                        $updates[$jfield] = $decoded;
-                    }
-                }
-            }
-        }
-
-        if (!empty($updates)) {
+        $etudiant->bio = $request->bio;
+        $etudiant->phone = $request->phone;
+        $etudiant->email = $request->email;
+        $etudiant->city = $request->city;
+        $etudiant->linkedin = $request->linkedin;
+        $etudiant->github = $request->github;
+        if ($request->has('profile_skills')) {
+            $decoded = null;
             try {
-                $etudiant->fill($updates);
-                $etudiant->save();
-            } catch (\Throwable $e) {
-                Log::error('updateAbout save failed', ['error' => $e->getMessage(), 'updates' => $updates]);
-                return redirect()->route('about')->with('error', 'Erreur lors de la mise à jour du profil.');
-            }
+                $decoded = json_decode($request->profile_skills, true);
+            } catch (\Throwable $e) { $decoded = null; }
+            $etudiant->profile_skills = $decoded ?: null;
         }
+        if ($request->has('profile_interests')) {
+            $decoded = null;
+            try {
+                $decoded = json_decode($request->profile_interests, true);
+            } catch (\Throwable $e) { $decoded = null; }
+            $etudiant->profile_interests = $decoded ?: null;
+        }
+        if ($request->has('profile_experience')) {
+            $decoded = null;
+            try {
+                $decoded = json_decode($request->profile_experience, true);
+            } catch (\Throwable $e) { $decoded = null; }
+            $etudiant->profile_experience = $decoded ?: null;
+        }
+        $etudiant->save();
 
         return redirect()->route('about')->with('success', 'Profil mis à jour. Votre CV a été régénéré automatiquement.');
     }
@@ -639,23 +599,19 @@ class DashboardController extends Controller
         ];
 
         // Use stored JSON if present, otherwise defaults
-        try {
-            $profileSkills = $profile->profile_skills ? json_decode($profile->profile_skills, true) : null;
-        } catch (\Throwable $e) {
-            $profileSkills = null;
-        }
+        // ✅ APRÈS (corrigé)
+// profile_skills est déjà un array grâce au $casts du Model
+$profileSkills = is_array($profile->profile_skills)
+    ? $profile->profile_skills
+    : (is_string($profile->profile_skills) ? json_decode($profile->profile_skills, true) : null);
 
-        try {
-            $profileInterests = $profile->profile_interests ? json_decode($profile->profile_interests, true) : null;
-        } catch (\Throwable $e) {
-            $profileInterests = null;
-        }
+$profileInterests = is_array($profile->profile_interests)
+    ? $profile->profile_interests
+    : (is_string($profile->profile_interests) ? json_decode($profile->profile_interests, true) : null);
 
-        try {
-            $profileExperience = $profile->profile_experience ? json_decode($profile->profile_experience, true) : null;
-        } catch (\Throwable $e) {
-            $profileExperience = null;
-        }
+$profileExperience = is_array($profile->profile_experience)
+    ? $profile->profile_experience
+    : (is_string($profile->profile_experience) ? json_decode($profile->profile_experience, true) : null);
 
         $profile->skills = $profileSkills ?? ($defaultsSkills[$filiere] ?? []);
         $profile->interests = $profileInterests ?? ($defaultsInterests[$filiere] ?? []);
