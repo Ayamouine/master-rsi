@@ -1,0 +1,137 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Button Component Styles
+   ───────────────────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-family: var(--font-display);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ─── Sizes ─── */
+.btn-sm {
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--text-sm);
+}
+
+.btn-md {
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--text-base);
+}
+
+.btn-lg {
+  padding: var(--spacing-4) var(--spacing-6);
+  font-size: var(--text-lg);
+}
+
+/* ─── Variants ─── */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-navy) 100%);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--bg-light);
+  color: var(--primary-dark);
+  border: 2px solid var(--secondary-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--primary-dark);
+  background: white;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #059669;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--primary-dark);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--bg-light);
+  border-color: var(--secondary-border);
+}
+
+.btn-amber {
+  background: var(--primary-amber);
+  color: white;
+}
+
+.btn-amber:hover:not(:disabled) {
+  background: #b45309;
+}
+
+/* ─── Disabled ─── */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Group ─── */
+.button-group {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.button-group.vertical {
+  flex-direction: column;
+}
+
+.button-group.attached .btn {
+  border-radius: 0;
+  margin: 0 -1px;
+}
+
+.button-group.attached .btn:first-child {
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+}
+
+.button-group.attached .btn:last-child {
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+}
+
+@media (max-width: 480px) {
+  .btn-md {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--text-sm);
+  }
+}

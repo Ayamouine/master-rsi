@@ -1,0 +1,80 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Card Component Styles
+   ───────────────────────────────────────────────────────────────────────── */
+
+.card {
+  background: white;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.card-default {
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--secondary-border);
+}
+
+.card-default:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-elevated {
+  box-shadow: var(--shadow-lg);
+}
+
+.card-flat {
+  background: var(--bg-light);
+  border: 1px solid var(--secondary-border);
+}
+
+.card-primary {
+  border: 2px solid var(--primary-dark);
+  background: linear-gradient(135deg, rgba(26, 58, 107, 0.02) 0%, rgba(13, 27, 62, 0.02) 100%);
+}
+
+/* ─── Parts ─── */
+.card-header {
+  padding: var(--spacing-6);
+  border-bottom: 1px solid var(--secondary-border);
+}
+
+.card-header h3,
+.card-header h4 {
+  margin: 0;
+  color: var(--primary-dark);
+}
+
+.card-body {
+  padding: var(--spacing-6);
+}
+
+.card-footer {
+  padding: var(--spacing-6);
+  border-top: 1px solid var(--secondary-border);
+  background: var(--bg-light);
+}
+
+/* ─── Empty state ─── */
+.card-empty {
+  padding: var(--spacing-12);
+  text-align: center;
+  color: var(--secondary-text);
+}
+
+.card-empty-icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-4);
+}
+
+.card-empty-text {
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .card-header,
+  .card-body,
+  .card-footer {
+    padding: var(--spacing-4);
+  }
+}
